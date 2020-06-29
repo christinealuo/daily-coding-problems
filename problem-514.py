@@ -12,53 +12,67 @@
 # O(1) to put number into map and get -1/+1
 # O(1) to access correct bucket and append new number to that bucket
 
+# Before and after not in map
+# Before in map and after not in map - check for sequence
+# Before not in map and after in map - check for sequence
+# Before and after in map - before and after is 0, before is 0 and after is not, after is 0 and before is not
+
 def problem_514(numbers):
     buckets = [[]]
     nextBucket = 1
     numberToBucket = {} # { 100: 0, 4: 0, 200: 0, 1: 0, 3: 1, 2: 1}
     longestBucket = 0
-    for number in numbers: # 2
-        before = number - 1 # 1
-        after = number + 1 # 3
+    for number in numbers:
+        before = number - 1
+        after = number + 1
         if (not before in numberToBucket) and (not after in numberToBucket):
-            # No before and after
             numberToBucket[number] = 0
         elif before in numberToBucket and (not after in numberToBucket):
-            # Seen before and before
             bucket = numberToBucket[before]
             if bucket == 0:
-                # Create new bucket for before-number sequence
                 bucket = nextBucket
                 nextBucket += 1
                 buckets.append([before])
             numberToBucket[number] = bucket
             buckets[bucket].append(number)
-            # Update longest bucket if necessary
             if len(buckets[bucket]) > len(buckets[longestBucket]):
                 longestBucket = bucket
-            # After checking before, check after again to update after
-            if after in numberToBucket:
-                buckets[bucket].append(after)
-                # Update longest bucket if necessary
-                if len(buckets[bucket]) > len(buckets[longestBucket]):
-                    longestBucket = bucket
-        elif after in numberToBucket: # 3
-            bucket = numberToBucket[after] # 1
+        elif after in numberToBucket and (not before in numberToBucket):
+            bucket = numberToBucket[after]
             if bucket == 0:
-                # Create new bucket for number-after sequence
-                bucket = nextBucket # 1
-                nextBucket += 1 # 2
-                buckets.append([after]) # [[], [4]]
+                bucket = nextBucket
+                nextBucket += 1
+                buckets.append([after])
             numberToBucket[number] = bucket
-            buckets[bucket].append(number) # [[], [4, 3, 2]]
-            # Update longest bucket if necessary
+            buckets[bucket].append(number)
             if len(buckets[bucket]) > len(buckets[longestBucket]):
-                longestBucket = bucket # 1
-            # After checking after, check before again to update after
-            if before in numberToBucket: # 1
-                buckets[bucket].append(before) # [[], [4, 3, 2, 1]]
-                # Update longest bucket if necessary
-                if len(buckets[bucket]) > len(buckets[longestBucket]):
+                longestBucket = bucket
+        elif before in numberToBucket and after in numberToBucket:
+            beforeBucket = numberToBucket[before]
+            afterBucket = numberToBucket[after]
+            if beforeBucket == 0 and afterBucket == 0:
+                bucket = nextBucket
+                nextBucket += 1
+                buckets.append([before, number, after])
+                numberToBucket[before] = bucket
+                numberToBucket[number] = bucket
+                numberToBucket[after] = bucket
+            elif beforeBucket == 0 and afterBucket != 0:
+                bucket = afterBucket
+                buckets[bucket].extend([before, number])
+                numberToBucket[before] = bucket
+                numberToBucket[number] = bucket
+            elif beforeBucket != 0 and afterBucket == 0:
+                bucket = beforeBucket
+                buckets[bucket].extend([number, after])
+                numberToBucket[number] = bucket
+                numberToBucket[after] = bucket
+            else: # Before and after assigned to different buckets
+                bucket = afterBucket
+                buckets[bucket].extend([number] + buckets[beforeBucket])
+                # TODO: make sure that all the numbers in the before bucket are updated in the map but that will add some more complexity
+                numberToBucket[number] = bucket
+            if len(buckets[bucket]) > len(buckets[longestBucket]):
                     longestBucket = bucket
     print(buckets)
     print(numberToBucket)
