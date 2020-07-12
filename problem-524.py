@@ -17,3 +17,4 @@ numbers = [34, -50, 42, 14, -5, 86]
 print(problem_524(numbers))
 numbers2 = [-5, -1, -8, -9]
 print(problem_524(numbers2))
+~
